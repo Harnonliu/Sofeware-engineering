@@ -1,5 +1,5 @@
 import telebot
-bot = telebot.TeleBot('6203364575:AAF4CYl8LJVsolhyUo7pT8HyZSAyCAtf9aE')
+bot = telebot.TeleBot('Awaiting revision')
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
  bot.reply_to(message, "Howdy, how are you doing?")
