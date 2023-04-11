@@ -1,5 +1,6 @@
 import time
-import psutil
+import psutil  
+# need to install psutil (pip)
 import random
 
 class Sender:
