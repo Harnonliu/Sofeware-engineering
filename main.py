@@ -1,36 +1,51 @@
 import time
+import psutil
+import random
 
-class Switch:
+class Sender:
+    def sendMessage(self, message):
+        print(message)
+
+class ActivityRecognizer:
     def __init__(self):
-        self.state = False
+        self.refresh()
 
-    def turn_on(self):
-        self.state = True
+    def refresh(self):
+        self.pids = psutil.pids()
 
-    def turn_off(self):
-        self.state = False
+    def getActivityType(self):
+        self.refresh()
+        index = random.randint(0, len(self.pids)-1)
+        pid = self.pids[index]
+        process = psutil.Process(pid)
+        return process.name()
 
-class SwitchMonitor:
-    def __init__(self, switch):
-        self.switch = switch
-        self.runtime_data = []
+class PowerController:
+    def __init__(self):
+        self.flag = "off"
 
-    def start_monitoring(self):
+    def getState(self):
+        return self.flag
+
+    def turnOn(self):
+        self.flag = "on"
+
+    def turnOff(self):
+        self.flag = "off"
+
+class Application:
+    def __init__(self):
+        self.sender = Sender()
+        self.activityRecognizer = ActivityRecognizer()
+        self.powerController = PowerController()
+        self.powerController.turnOn()
+
+    def run(self):
         while True:
-            if self.switch.state:
-                start_time = time.time()
-                while self.switch.state:
-                    time.sleep(1)
-                end_time = time.time()
-                runtime = end_time - start_time
-                self.runtime_data.append(runtime)
+            time.sleep(0.5)
+            message = "PC is " + self.powerController.getState() + ", application '" + self.activityRecognizer.getActivityType() + "' is running."
+            self.sender.sendMessage(message)
 
-class SwitchDataUploader:
-    def __init__(self, switch_monitor):
-        self.switch_monitor = switch_monitor
-
-    def upload_data(self):
-        # Convert the runtime data into a graph
-        # Upload the graph to the cloud
-        # Send the graph to your parents' phones
-        pass
+if __name__ == '__main__':
+    app = Application()
+    app.run()
