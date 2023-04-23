@@ -144,3 +144,4 @@ valorant.exe
 diablo3.exe
 pathofexile_x64.exe
 steam.exe
+worldoftanks.exe

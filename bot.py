@@ -2,6 +2,12 @@ import psutil
 import openpyxl
 import os
 import telebot
+import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+bot = telebot.TeleBot(BOT_TOKEN)
 
 class ProcessInfo:
     def __init__(self):
@@ -16,7 +22,8 @@ class ProcessInfo:
                 process_info['name'] = process.info['name']
                 process_info['username'] = process.info['username']
                 process_info['memory_percent'] = process.info['memory_percent']
-                process_info['create_time'] = process.info['create_time']
+                create_time = datetime.datetime.fromtimestamp(process.info['create_time'])
+                process_info['create_time'] = create_time.strftime('%H:%M:%S')
                 process_info['num_threads'] = process.info['num_threads']
                 process_info['connections'] = process.info['connections']
                 self.process_list.append(process_info)
@@ -89,8 +96,6 @@ class ProcessClassification:
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 return [line.strip() for line in f if line.strip()]
-        else:
-            return ['game.exe', 'steam.exe', 'origin.exe']
 
     def write_game_names(self, filename):
         with open(filename, 'w') as f:
@@ -106,29 +111,24 @@ class Shutdown:
         os.system('shutdown /s /t 1')
 
 
-from dotenv import load_dotenv
-load_dotenv()
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
-bot = telebot.TeleBot(BOT_TOKEN)
-
 process_info = ProcessInfo()
 process_classification = ProcessClassification()
 
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "Welcome to the Telecom Bot. You can use the following commands:\n/tasklist - Get a list of running processes\n/filtergames - Get a list of running game processes\n/addgame - Add a process to the game filter\n/removegame - Remove a process from the game filter\n/shutdown - Shutdown")
+    bot.reply_to(message, "Welcome to the Telecom Bot. You can use the following commands:\n/Processlist - Get a list of running processes\n/Filtergames - Get a list of running game processes\n/Addgame - Add a process to the game filter\n/Removegame - Remove a process from the game filter\n/Shutdown - Shutdown")
 
-@bot.message_handler(commands=['tasklist'])
-def send_tasklist(message):
+@bot.message_handler(commands=['Processlist'])
+def send_Processlist(message):
     process_info.refresh()
-    process_info.write_to_excel('tasklist.xlsx')
+    process_info.write_to_excel('Processlist.xlsx')
 
-    with open('tasklist.xlsx', 'rb') as f:
+    with open('Processlist.xlsx', 'rb') as f:
         bot.send_document(message.chat.id, f)
 
-@bot.message_handler(commands=['filtergames'])
-def send_filtered_tasklist(message):
+@bot.message_handler(commands=['Filtergames'])
+def send_filtered_Processlist(message):
     process_info.refresh()
     game_processes = process_classification.classify_processes(process_info)
     if len(game_processes) > 0:
@@ -139,7 +139,7 @@ def send_filtered_tasklist(message):
     else:
         bot.reply_to(message, "No game processes currently running.")
 
-@bot.message_handler(commands=['addgame'])
+@bot.message_handler(commands=['Addgame'])
 def send_addgame(message):
     try:
         text = message.text
@@ -149,7 +149,7 @@ def send_addgame(message):
     except Exception as e:
         bot.reply_to(message, "Failed to add game process.")
 
-@bot.message_handler(commands=['removegame'])
+@bot.message_handler(commands=['Removegame'])
 def send_removegame(message):
     try:
         text = message.text
@@ -159,7 +159,7 @@ def send_removegame(message):
     except Exception as e:
         bot.reply_to(message, "Failed to remove game process.")
 
-@bot.message_handler(commands=['shutdown'])
+@bot.message_handler(commands=['Shutdown'])
 def send_shutdown(message):
     shutdown = Shutdown()
     shutdown.shutdown()
